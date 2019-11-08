@@ -1,6 +1,9 @@
 #ifndef BOARD_HPP
 #define BOARD_HPP
 
+#include <iostream>
+#include <iomanip>
+
 struct Cell {
     char kind;
     int steps;
@@ -14,11 +17,6 @@ struct Cell {
     }
 };
 
-struct Point
-{
-    int x, y;
-    Point(int _x = 0, int _y = 0): x(_x), y(_y) {}
-};
 
 class Robot;
 
@@ -41,6 +39,33 @@ public:
         }
         delete[] floor;
     }
+
+    void print_step_map(){
+        for (int i = 0; i < rows; i++){
+            for (int j = 0; j < cols; j++){
+                if (floor[i][j].kind == '1'){
+                    std::cout << std::setw(3) << 'x';
+                }
+                else {
+                    std::cout << std::setw(3) << floor[i][j].steps;
+                }
+            } std::cout << std::endl;
+        }
+    }
+
+    void print_neighbor_map(){
+        for (int i = 0; i < rows; i++){
+            for (int j = 0; j < cols; j++){
+                if (floor[i][j].kind == '1'){
+                    std::cout << std::setw(3) << 'x';
+                }
+                else {
+                    std::cout << std::setw(3) << floor[i][j].neighbor;
+                }
+            } std::cout << std::endl;
+        }
+    }
+
 
     friend Robot;
 };
