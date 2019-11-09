@@ -12,8 +12,16 @@ struct Cell {
 
     Cell(): kind('1'), steps(0), neighbor(0), cleaned(false) {}
 
-    bool isCharger() {
+    bool is_charger() {
         return kind == 'R';
+    }
+
+    bool can_walk(){
+        return kind != '1';
+    }
+
+    bool need_to_clean(){
+        return can_walk() && !cleaned;
     }
 };
 
