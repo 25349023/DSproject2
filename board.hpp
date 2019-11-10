@@ -6,11 +6,11 @@
 
 struct Cell {
     char kind;
-    int steps;
-    int neighbor;
     bool cleaned;
+    short neighbor;
+    int steps, step_wrt_ldc;
 
-    Cell(): kind('1'), steps(0), neighbor(0), cleaned(false) {}
+    Cell(): kind('1'), cleaned(false), neighbor(0), steps(0), step_wrt_ldc(-1) {}
 
     bool is_charger() {
         return kind == 'R';
@@ -56,6 +56,19 @@ public:
                 }
                 else {
                     std::cout << std::setw(3) << floor[i][j].steps;
+                }
+            } std::cout << std::endl;
+        }
+    }
+
+    void print_wrt_step_map(){
+        for (int i = 0; i < rows; i++){
+            for (int j = 0; j < cols; j++){
+                if (floor[i][j].kind == '1'){
+                    std::cout << std::setw(3) << 'x';
+                }
+                else {
+                    std::cout << std::setw(3) << floor[i][j].step_wrt_ldc;
                 }
             } std::cout << std::endl;
         }
