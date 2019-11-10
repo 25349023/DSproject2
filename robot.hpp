@@ -5,26 +5,6 @@
 #include "board.hpp"
 using std::cout;
 using std::endl;
-struct Point
-{
-    short x, y;
-    Point(int _x = 0, int _y = 0): x(_x), y(_y) {}
-
-    bool operator ==(const Point &oth){
-        return x == oth.x && y == oth.y;
-    }
-    bool operator !=(const Point &oth){
-        return x != oth.x || y != oth.y;
-    }
-    Point operator -(const Point &oth){
-        return Point(x - oth.x, y - oth.y);
-    }
-
-    int distance(const Point &oth){
-        using std::abs;
-        return abs(x - oth.x) + abs(y - oth.y);
-    }
-};
 
 class Robot {
     int battery, full_bat;
@@ -59,7 +39,7 @@ public:
         battery(bat), full_bat(bat), board(brd), position(chgr), last_dirty_cell(),
         charger(chgr), que(new Point[board->rows * board->cols]), 
         cells_to_clean(0), low_battery(false), finding_path(false) {
-        board->floor[chgr.x][chgr.y].cleaned = true;
+        (*board)[chgr].cleaned = true;
         scan_initialize();
     }
 
@@ -96,8 +76,8 @@ bool Robot::out_of_bound(const short x, const short y){
 
 int Robot::step_diff(const Point &rhs){
     using std::abs;
-    return abs(board->floor[last_dirty_cell.x][last_dirty_cell.y].step_wrt_ldc -
-        board->floor[rhs.x][rhs.y].step_wrt_ldc);
+    return abs((*board)[last_dirty_cell].step_wrt_ldc - 
+        (*board)[rhs].step_wrt_ldc);
 }
 
 
@@ -113,14 +93,13 @@ void Robot::scan_initialize(){
             if (out_of_bound(next)){
                 continue;
             }
-            if (can_visit(board->floor[next.x][next.y])){
+            if (can_visit((*board)[next])){
                 que[front++] = next;
-                board->floor[next.x][next.y].steps = 
-                    board->floor[curr.x][curr.y].steps + 1;
+                (*board)[next].steps = (*board)[curr].steps + 1;
                 for (int i = 0; i < 4; i++){
                     int tx = next.x + dir[i][0], ty = next.y + dir[i][1];
-                    if (board->floor[tx][ty].kind == '0'){
-                        board->floor[next.x][next.y].neighbor++; 
+                    if ((*board)[tx][ty].kind == '0'){
+                        (*board)[next].neighbor++; 
                     }
                 }
                 cells_to_clean++;
@@ -137,7 +116,7 @@ bool Robot::check_for_battery(){
         if (out_of_bound(nx, ny)){
             continue;
         }
-        if (board->floor[nx][ny].steps >= battery){
+        if ((*board)[nx][ny].steps >= battery){
             // cout << "low battery" << endl;
             low_battery = true;
             return true;
@@ -155,15 +134,15 @@ Point Robot::pick_by_distance(){
 
     for (int k = 0; k < 4; k++){
         short nx = position.x + dir[k][0], ny = position.y + dir[k][1];
-        if (out_of_bound(nx, ny) || !board->floor[nx][ny].need_to_clean()){
+        if (out_of_bound(nx, ny) || !(*board)[nx][ny].need_to_clean()){
             continue;
         }
 
-        if ( (board->floor[nx][ny].steps > max_step) || 
-             (board->floor[nx][ny].steps == max_step &&
-                board->floor[nx][ny].neighbor < min_neighbor) ){
-            max_step = board->floor[nx][ny].steps;
-            min_neighbor = board->floor[nx][ny].neighbor;
+        if ( ((*board)[nx][ny].steps > max_step) || 
+             ((*board)[nx][ny].steps == max_step &&
+                (*board)[nx][ny].neighbor < min_neighbor) ){
+            max_step = (*board)[nx][ny].steps;
+            min_neighbor = (*board)[nx][ny].neighbor;
             target.x = nx;
             target.y = ny;
         }
@@ -175,33 +154,33 @@ Point Robot::pick_by_distance(){
 Point Robot::find_near(){
     // cout << "find near  ";
     Point target(position);
-    int min_step = board->floor[position.x][position.y].steps;
+    int min_step = (*board)[position].steps;
     int min_neighbor = 5;
     const short dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
 
     for (int k = 0; k < 4; k++){
         short nx = position.x + dir[k][0], ny = position.y + dir[k][1];
-        if (out_of_bound(nx, ny) || !board->floor[nx][ny].can_walk()){
+        if (out_of_bound(nx, ny) || !(*board)[nx][ny].can_walk()){
             continue;
         }
-        if (board->floor[nx][ny].steps < min_step){
+        if ((*board)[nx][ny].steps < min_step){
             target.x = nx;
             target.y = ny;
-            min_step = board->floor[nx][ny].steps;
-            if (board->floor[nx][ny].cleaned){
+            min_step = (*board)[nx][ny].steps;
+            if ((*board)[nx][ny].cleaned){
                 min_neighbor = 5;
             }
             else {
-                min_neighbor = board->floor[nx][ny].neighbor;
+                min_neighbor = (*board)[nx][ny].neighbor;
             }
         }
-        else if (board->floor[nx][ny].steps == min_step){
-            if (!board->floor[nx][ny].cleaned && 
-                board->floor[nx][ny].neighbor < min_neighbor){
+        else if ((*board)[nx][ny].steps == min_step){
+            if (!(*board)[nx][ny].cleaned && 
+                (*board)[nx][ny].neighbor < min_neighbor){
                 target.x = nx;
                 target.y = ny;
-                min_step = board->floor[nx][ny].steps;
-                min_neighbor = board->floor[nx][ny].neighbor;
+                min_step = (*board)[nx][ny].steps;
+                min_neighbor = (*board)[nx][ny].neighbor;
             }
         }
     }
@@ -221,8 +200,8 @@ Point Robot::get_closed_to_ldc(){
 
     for (int k = 0; k < 4; k++){
         Point next(position.x + dir[k][0], position.y + dir[k][1]);
-        if (out_of_bound(next) || !board->floor[next.x][next.y].can_walk() ||
-            board->floor[next.x][next.y].step_wrt_ldc < 0){
+        if (out_of_bound(next) || !(*board)[next].can_walk() ||
+            (*board)[next].step_wrt_ldc < 0){
             continue;
         }
 
@@ -254,7 +233,7 @@ Point Robot::pick_one_cell(){
         target = pick_by_distance();
         if (target == position){
             short lx = last_dirty_cell.x, ly = last_dirty_cell.y;
-            if (board->floor[lx][ly].neighbor <= 0){
+            if ((*board)[lx][ly].neighbor <= 0){
                 find_dirty_cell();
             }
             plan_path_to_dirty();
@@ -278,8 +257,8 @@ void Robot::decrease_neighbor(){
 
     for (int k = 0; k < 4; k++){
         short nx = position.x + dir[k][0], ny = position.y + dir[k][1];
-        if (!out_of_bound(nx, ny) && board->floor[nx][ny].kind == '0'){
-            board->floor[nx][ny].neighbor--;
+        if (!out_of_bound(nx, ny) && (*board)[nx][ny].kind == '0'){
+            (*board)[nx][ny].neighbor--;
         }
     }
 }
@@ -288,39 +267,24 @@ void Robot::record_last_dirty(){
     const short dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
     short min_dis = 9999;
 
-    if (board->floor[position.x][position.y].neighbor > 1){
+    if ((*board)[position].neighbor > 1){
         last_dirty_cell = position;
     }
-    else if (low_battery && board->floor[position.x][position.y].neighbor == 1){
+    else if (low_battery && (*board)[position].neighbor == 1){
         for (int k = 0; k < 4; k++){
             short nx = position.x + dir[k][0], ny = position.y + dir[k][1];
-            if (out_of_bound(nx, ny) || !board->floor[nx][ny].need_to_clean()){
+            if (out_of_bound(nx, ny) || !(*board)[nx][ny].need_to_clean()){
                 continue;
             }
-            if (board->floor[nx][ny].steps > board->floor[position.x][position.y].steps){
+            if ((*board)[nx][ny].steps > (*board)[position].steps){
                 last_dirty_cell = position;
             }
         }
-    }
-
-    /** for (int k = 0; k < 4; k++){
-        Point next(position.x + dir[k][0], position.y + dir[k][1]);
-        if (out_of_bound(next)){
-            continue;
-        }
-        if (board->floor[next.x][next.y].need_to_clean() && 
-            board->floor[next.x][next.y].steps < min_dis){
-            last_dirty_cell = next;
-            cout << "record (" << next.x << ", " << next.y << ")\n";
-            min_dis = board->floor[next.x][next.y].steps;
-        }
-    } */
-    
+    }    
 }
 
 void Robot::find_dirty_cell(){
     // cout << "find dirty  ";
-
     
     bool **visited = new bool*[board->rows];
     for (int i = 0; i < board->rows; i++){
@@ -336,13 +300,13 @@ void Robot::find_dirty_cell(){
         Point curr = que[tail++];
         for (int k = 0; k < 4 && !flag; k++){
             Point next(curr.x + dir[k][0], curr.y + dir[k][1]);
-            if (out_of_bound(next) || !board->floor[next.x][next.y].can_walk()){
+            if (out_of_bound(next) || !(*board)[next].can_walk()){
                 continue;
             }
             if (!visited[next.x][next.y]){
                 que[front++] = next;
                 visited[next.x][next.y] = true;
-                if (!board->floor[next.x][next.y].cleaned){
+                if (!(*board)[next].cleaned){
                     last_dirty_cell = next;
                     flag = true;
                 }
@@ -361,20 +325,18 @@ void Robot::plan_path_to_dirty(){
     int front = 0, tail = 0;
     const short dir[4][2] = {{0, -1}, {-1, 0}, {0, 1}, {1, 0}};
     que[front++] = last_dirty_cell;
-    board->floor[last_dirty_cell.x][last_dirty_cell.y].step_wrt_ldc = 0;
+    (*board)[last_dirty_cell].step_wrt_ldc = 0;
 
     while (front > tail){
         Point curr = que[tail++];
         for (int k = 0; k < 4; k++){
             Point next(curr.x + dir[k][0], curr.y + dir[k][1]);
-            if (out_of_bound(next) || !board->floor[next.x][next.y].can_walk()){
+            if (out_of_bound(next) || !(*board)[next].can_walk()){
                 continue;
             }
-            if (board->floor[next.x][next.y].step_wrt_ldc == -1){  // not visited
+            if ((*board)[next].step_wrt_ldc == -1){  // not visited
                 que[front++] = next;
-                board->floor[next.x][next.y].step_wrt_ldc = 
-                    board->floor[curr.x][curr.y].step_wrt_ldc + 1;
-
+                (*board)[next].step_wrt_ldc = (*board)[curr].step_wrt_ldc + 1;
                 if (next == position){
                     return;
                 }
@@ -387,17 +349,17 @@ void Robot::reset_path(){
     int front = 0, tail = 0;
     const short dir[4][2] = {{0, -1}, {-1, 0}, {0, 1}, {1, 0}};
     que[front++] = last_dirty_cell;
-    board->floor[last_dirty_cell.x][last_dirty_cell.y].step_wrt_ldc = 0;
+    (*board)[last_dirty_cell].step_wrt_ldc = 0;
 
     while (front > tail){
         Point curr = que[tail++];
-        board->floor[curr.x][curr.y].step_wrt_ldc = -1;
+        (*board)[curr].step_wrt_ldc = -1;
         for (int k = 0; k < 4; k++){
             Point next(curr.x + dir[k][0], curr.y + dir[k][1]);
-            if (out_of_bound(next) || !board->floor[next.x][next.y].can_walk()){
+            if (out_of_bound(next) || !(*board)[next].can_walk()){
                 continue;
             }
-            if (board->floor[next.x][next.y].step_wrt_ldc != -1){  // not visited
+            if ((*board)[next].step_wrt_ldc != -1){  // not visited
                 que[front++] = next;
             }
         }
@@ -411,8 +373,8 @@ Point Robot::sweep_one_cell(){
         reset_path();
         finding_path = false;
     }
-    if (!board->floor[position.x][position.y].cleaned){
-        board->floor[position.x][position.y].cleaned = true;
+    if (!(*board)[position].cleaned){
+        (*board)[position].cleaned = true;
         cells_to_clean--;
         decrease_neighbor();
     }

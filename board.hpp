@@ -4,6 +4,28 @@
 #include <iostream>
 #include <iomanip>
 
+struct Point
+{
+    short x, y;
+    Point(int _x = 0, int _y = 0): x(_x), y(_y) {}
+
+    bool operator ==(const Point &oth){
+        return x == oth.x && y == oth.y;
+    }
+    bool operator !=(const Point &oth){
+        return x != oth.x || y != oth.y;
+    }
+    Point operator -(const Point &oth){
+        return Point(x - oth.x, y - oth.y);
+    }
+
+    int distance(const Point &oth){
+        using std::abs;
+        return abs(x - oth.x) + abs(y - oth.y);
+    }
+};
+
+
 struct Cell {
     char kind;
     bool cleaned;
@@ -85,6 +107,15 @@ public:
                 }
             } std::cout << std::endl;
         }
+    }
+
+
+    Cell* operator [](const int index){
+        return floor[index];
+    }
+
+    Cell& operator [](const Point& p){
+        return floor[p.x][p.y];
     }
 
     friend Robot;
