@@ -176,7 +176,7 @@ Point Robot::find_near(){
     cout << "find near  ";
     Point target(position);
     int min_step = board->floor[position.x][position.y].steps;
-    bool target_cleaned = true;
+    int min_neighbor = 5;
     const short dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
 
     for (int k = 0; k < 4; k++){
@@ -188,14 +188,20 @@ Point Robot::find_near(){
             target.x = nx;
             target.y = ny;
             min_step = board->floor[nx][ny].steps;
-            target_cleaned = board->floor[nx][ny].cleaned;
+            if (board->floor[nx][ny].cleaned){
+                min_neighbor = 5;
+            }
+            else {
+                min_neighbor = board->floor[nx][ny].neighbor;
+            }
         }
         else if (board->floor[nx][ny].steps == min_step){
-            if (target_cleaned && !board->floor[nx][ny].cleaned){
-                target_cleaned = false;
+            if (!board->floor[nx][ny].cleaned && 
+                board->floor[nx][ny].neighbor < min_neighbor){
                 target.x = nx;
                 target.y = ny;
                 min_step = board->floor[nx][ny].steps;
+                min_neighbor = board->floor[nx][ny].neighbor;
             }
         }
     }
