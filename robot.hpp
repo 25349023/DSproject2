@@ -16,23 +16,24 @@ class Robot {
     bool low_battery, finding_path;
     
     void scan_initialize();
+
     bool can_visit(const Cell &c);
     bool out_of_bound(const Point& p);
     bool out_of_bound(const short x, const short y);
+    
     int step_diff(const Point &rhs);
+    bool check_for_battery();
 
     Point pick_one_cell();
-    void decrease_neighbor();
-    void record_last_dirty();
-
     Point pick_by_distance();
     Point get_closed_to_ldc();
     Point find_near();
 
+    void decrease_neighbor();
+    void record_last_dirty();
     void find_dirty_cell();
     void plan_path_to_dirty();
     void reset_path();
-    bool check_for_battery();
 
 public:
     Robot(int bat, Point chgr, Board *brd = nullptr):
