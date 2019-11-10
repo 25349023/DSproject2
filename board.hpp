@@ -87,7 +87,6 @@ public:
         }
     }
 
-
     friend Robot;
 };
 

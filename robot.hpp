@@ -138,7 +138,7 @@ bool Robot::check_for_battery(){
             continue;
         }
         if (board->floor[nx][ny].steps >= battery){
-            cout << "low battery" << endl;
+            // cout << "low battery" << endl;
             low_battery = true;
             return true;
         }
@@ -148,7 +148,7 @@ bool Robot::check_for_battery(){
 
 
 Point Robot::pick_by_distance(){
-    cout << "pick by dis  ";
+    // cout << "pick by dis  ";
     Point target(position);
     const short dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
     int max_step = 0, min_neighbor = 5;
@@ -173,7 +173,7 @@ Point Robot::pick_by_distance(){
 }
 
 Point Robot::find_near(){
-    cout << "find near  ";
+    // cout << "find near  ";
     Point target(position);
     int min_step = board->floor[position.x][position.y].steps;
     int min_neighbor = 5;
@@ -210,12 +210,11 @@ Point Robot::find_near(){
 
 
 Point Robot::get_closed_to_ldc(){
-    /// TODO:
-    cout << "finding " << last_dirty_cell.x << ", "
-         << last_dirty_cell.y << endl;
+    // cout << "finding " << last_dirty_cell.x << ", "
+    //      << last_dirty_cell.y << endl;
 
     using std::abs;
-    cout << "get close  ";
+    // cout << "get close  ";
     int min_step = step_diff(position) + 2, min_dis = 9999;
     Point target(position);
     const short dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
@@ -258,16 +257,14 @@ Point Robot::pick_one_cell(){
             if (board->floor[lx][ly].neighbor <= 0){
                 find_dirty_cell();
             }
-
             plan_path_to_dirty();
-            board->print_wrt_step_map();
+            // board->print_wrt_step_map();
             finding_path = true;
             target = get_closed_to_ldc();
         }
         if (target == position){
             target = find_near();
         }
-
     }
     
     return target;
@@ -322,7 +319,7 @@ void Robot::record_last_dirty(){
 }
 
 void Robot::find_dirty_cell(){
-    cout << "find dirty  ";
+    // cout << "find dirty  ";
 
     
     bool **visited = new bool*[board->rows];
@@ -360,7 +357,7 @@ void Robot::find_dirty_cell(){
 }
 
 void Robot::plan_path_to_dirty(){
-    cout << "plan dirty to  (" << last_dirty_cell.x << ", " << last_dirty_cell.y << ")\n";
+    // cout << "plan dirty to  (" << last_dirty_cell.x << ", " << last_dirty_cell.y << ")\n";
     int front = 0, tail = 0;
     const short dir[4][2] = {{0, -1}, {-1, 0}, {0, 1}, {1, 0}};
     que[front++] = last_dirty_cell;
@@ -423,8 +420,6 @@ Point Robot::sweep_one_cell(){
         record_last_dirty();
     }
 
-    //cout << "pick finish" << endl;
-
     battery--;
     if (position == charger){
         battery = full_bat;
@@ -433,7 +428,7 @@ Point Robot::sweep_one_cell(){
             reset_path();
             plan_path_to_dirty();
         }
-        cout << "charge\n";
+        // cout << "charge\n";
     }
     if (battery <= 0){
         throw "out of power";
