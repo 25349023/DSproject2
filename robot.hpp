@@ -133,18 +133,17 @@ Point Robot::pick_by_distance(){
     int max_step = 0, min_neighbor = 5;
 
     for (int k = 0; k < 4; k++){
-        short nx = position.x + dir[k][0], ny = position.y + dir[k][1];
-        if (out_of_bound(nx, ny) || !(*board)[nx][ny].need_to_clean()){
+        Point next(position.x + dir[k][0], position.y + dir[k][1]);
+        if (out_of_bound(next) || !(*board)[next].need_to_clean()){
             continue;
         }
 
-        if ( ((*board)[nx][ny].steps > max_step) || 
-             ((*board)[nx][ny].steps == max_step &&
-                (*board)[nx][ny].neighbor < min_neighbor) ){
-            max_step = (*board)[nx][ny].steps;
-            min_neighbor = (*board)[nx][ny].neighbor;
-            target.x = nx;
-            target.y = ny;
+        if ( ((*board)[next].steps > max_step) || 
+             ((*board)[next].steps == max_step &&
+                (*board)[next].neighbor < min_neighbor) ){
+            max_step = (*board)[next].steps;
+            min_neighbor = (*board)[next].neighbor;
+            target = next;
         }
     }
 
@@ -159,28 +158,26 @@ Point Robot::find_near(){
     const short dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
 
     for (int k = 0; k < 4; k++){
-        short nx = position.x + dir[k][0], ny = position.y + dir[k][1];
-        if (out_of_bound(nx, ny) || !(*board)[nx][ny].can_walk()){
+        Point next(position.x + dir[k][0], position.y + dir[k][1]);
+        if (out_of_bound(next) || !(*board)[next].can_walk()){
             continue;
         }
-        if ((*board)[nx][ny].steps < min_step){
-            target.x = nx;
-            target.y = ny;
-            min_step = (*board)[nx][ny].steps;
-            if ((*board)[nx][ny].cleaned){
+        if ((*board)[next].steps < min_step){
+            target = next;
+            min_step = (*board)[next].steps;
+            if ((*board)[next].cleaned){
                 min_neighbor = 5;
             }
             else {
-                min_neighbor = (*board)[nx][ny].neighbor;
+                min_neighbor = (*board)[next].neighbor;
             }
         }
-        else if ((*board)[nx][ny].steps == min_step){
-            if (!(*board)[nx][ny].cleaned && 
-                (*board)[nx][ny].neighbor < min_neighbor){
-                target.x = nx;
-                target.y = ny;
-                min_step = (*board)[nx][ny].steps;
-                min_neighbor = (*board)[nx][ny].neighbor;
+        else if ((*board)[next].steps == min_step){
+            if (!(*board)[next].cleaned && 
+                (*board)[next].neighbor < min_neighbor){
+                target = next;
+                min_step = (*board)[next].steps;
+                min_neighbor = (*board)[next].neighbor;
             }
         }
     }
@@ -232,8 +229,7 @@ Point Robot::pick_one_cell(){
     else {
         target = pick_by_distance();
         if (target == position){
-            short lx = last_dirty_cell.x, ly = last_dirty_cell.y;
-            if ((*board)[lx][ly].neighbor <= 0){
+            if ((*board)[last_dirty_cell].neighbor <= 0){
                 find_dirty_cell();
             }
             plan_path_to_dirty();
