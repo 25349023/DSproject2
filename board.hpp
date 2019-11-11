@@ -18,11 +18,6 @@ struct Point
     Point operator -(const Point &oth){
         return Point(x - oth.x, y - oth.y);
     }
-
-    int distance(const Point &oth){
-        using std::abs;
-        return abs(x - oth.x) + abs(y - oth.y);
-    }
 };
 
 
