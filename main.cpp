@@ -29,24 +29,15 @@ int main(){
     fin.close();
 
     Robot bot(battery, charger, &floorplan);
-    /*
-    floorplan.print_step_map();
-    cout << endl;
-    floorplan.print_neighbor_map();
-    cout << endl << endl;
-    //*/
 
     int count = 0;
     FILE *tmpf = tmpfile();
     fprintf(tmpf, "%hd %hd\n", charger.x, charger.y);
-    // cout << charger.x << " " << charger.y << endl;
     while (!bot.is_finished()){
         Point p = bot.sweep_one_cell();
         fprintf(tmpf, "%hd %hd\n", p.x, p.y);
-        // cout << p.x << " " << p.y << endl;
         count++;
     }
-    // cout << "steps: " << count << endl;
 
     char line[256];
     ofstream fout("final.path");
