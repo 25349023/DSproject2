@@ -1,7 +1,6 @@
 #ifndef ROBOT_HPP
 #define ROBOT_HPP
 
-#include <cmath>
 #include "board.hpp"
 
 class Robot {
@@ -18,15 +17,13 @@ class Robot {
     bool can_visit(const Cell &c);
     bool out_of_bound(const Point& p);
     bool out_of_bound(const short x, const short y);
-    
-    int step_diff(const Point &rhs);
-    bool check_for_battery();
 
     Point pick_one_cell();
     Point pick_by_distance();
     Point get_closed_to_ldc();
     Point find_near();
 
+    bool check_for_battery();
     void decrease_neighbor();
     void record_last_dirty();
     void find_dirty_cell();
@@ -71,12 +68,6 @@ bool Robot::out_of_bound(const short x, const short y){
         return true;
     }
     return false;
-}
-
-int Robot::step_diff(const Point &rhs){
-    using std::abs;
-    return abs((*board)[last_dirty_cell].step_wrt_ldc - 
-        (*board)[rhs].step_wrt_ldc);
 }
 
 
@@ -182,7 +173,7 @@ Point Robot::find_near(){
 
 
 Point Robot::get_closed_to_ldc(){
-    int min_step = step_diff(position) + 2, min_dis = 9999;
+    int min_step = (*board)[position].step_wrt_ldc;
     Point target(position);
     const short dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
 
@@ -193,15 +184,8 @@ Point Robot::get_closed_to_ldc(){
             continue;
         }
 
-        int tmp1 = step_diff(next), tmp2 = last_dirty_cell.distance(next);
-        if (tmp1 < min_step){
-            min_step = tmp1;
-            min_dis = tmp2;
-            target = next;
-        }
-        else if (tmp1 == min_step && tmp2 < min_dis){
-			min_step = tmp1;
-            min_dis = tmp2;
+        if ((*board)[next].step_wrt_ldc < min_step){
+            min_step = (*board)[next].step_wrt_ldc;
             target = next;
         }
     }
