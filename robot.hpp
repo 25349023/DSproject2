@@ -3,8 +3,6 @@
 
 #include <cmath>
 #include "board.hpp"
-using std::cout;
-using std::endl;
 
 class Robot {
     int battery, full_bat;
@@ -118,7 +116,6 @@ bool Robot::check_for_battery(){
             continue;
         }
         if ((*board)[nx][ny].steps >= battery){
-            // cout << "low battery" << endl;
             low_battery = true;
             return true;
         }
@@ -128,7 +125,6 @@ bool Robot::check_for_battery(){
 
 
 Point Robot::pick_by_distance(){
-    // cout << "pick by dis  ";
     Point target(position);
     const short dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
     int max_step = 0, min_neighbor = 5;
@@ -152,7 +148,6 @@ Point Robot::pick_by_distance(){
 }
 
 Point Robot::find_near(){
-    // cout << "find near  ";
     Point target(position);
     int min_step = (*board)[position].steps;
     int min_neighbor = 5;
@@ -187,11 +182,6 @@ Point Robot::find_near(){
 
 
 Point Robot::get_closed_to_ldc(){
-    // cout << "finding " << last_dirty_cell.x << ", "
-    //      << last_dirty_cell.y << endl;
-
-    using std::abs;
-    // cout << "get close  ";
     int min_step = step_diff(position) + 2, min_dis = 9999;
     Point target(position);
     const short dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
@@ -234,7 +224,6 @@ Point Robot::pick_one_cell(){
                 find_dirty_cell();
             }
             plan_path_to_dirty();
-            // board->print_wrt_step_map();
             finding_path = true;
             target = get_closed_to_ldc();
         }
@@ -281,8 +270,6 @@ void Robot::record_last_dirty(){
 }
 
 void Robot::find_dirty_cell(){
-    // cout << "find dirty  ";
-    
     bool **visited = new bool*[board->rows];
     for (int i = 0; i < board->rows; i++){
         visited[i] = new bool[board->cols]{};
@@ -314,11 +301,9 @@ void Robot::find_dirty_cell(){
         delete [] visited[i];
     }
     delete [] visited;
-    return;
 }
 
 void Robot::plan_path_to_dirty(){
-    // cout << "plan dirty to  (" << last_dirty_cell.x << ", " << last_dirty_cell.y << ")\n";
     int front = 0, tail = 0;
     const short dir[4][2] = {{0, -1}, {-1, 0}, {0, 1}, {1, 0}};
     que[front++] = last_dirty_cell;
@@ -364,7 +349,6 @@ void Robot::reset_path(){
 }
 
 Point Robot::sweep_one_cell(){
-    // cout << "sweep" << endl;
     position = pick_one_cell();
     if (position == last_dirty_cell){
         reset_path();
@@ -387,7 +371,6 @@ Point Robot::sweep_one_cell(){
             reset_path();
             plan_path_to_dirty();
         }
-        // cout << "charge\n";
     }
     if (battery <= 0){
         throw "out of power";
