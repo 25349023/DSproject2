@@ -47,10 +47,9 @@ class Robot;
 
 class Board {
     int rows, cols;
-
-public:
     Cell **floor; 
 
+public:
     Board(int r, int c): rows(r), cols(c), floor(nullptr) {
         floor = new Cell* [r];
         for (int i = 0; i < r; i++){

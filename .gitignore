@@ -1,6 +1,7 @@
 .vscode/
 
 *.exe
+*.o
 
 *.data
 *.path
