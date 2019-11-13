@@ -33,7 +33,7 @@ class Robot {
 public:
     Robot(int bat, Point chgr, Board *brd = nullptr):
         battery(bat), full_bat(bat), board(brd), position(chgr), last_dirty_cell(),
-        charger(chgr), que(new Point[board->rows * board->cols]), 
+        charger(chgr), que(new Point[board->rows * board->cols + 10]), 
         cells_to_clean(0), low_battery(false), finding_path(false) {
         (*board)[chgr].cleaned = true;
         scan_initialize();
@@ -215,7 +215,7 @@ Point Robot::pick_one_cell(){
             target = find_near();
         }
     }
-    
+
     return target;
 }
 
@@ -235,7 +235,6 @@ void Robot::decrease_neighbor(){
 
 void Robot::record_last_dirty(){
     const short dir[4][2] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-    short min_dis = 9999;
 
     if ((*board)[position].neighbor > 1){
         last_dirty_cell = position;
@@ -250,7 +249,7 @@ void Robot::record_last_dirty(){
                 last_dirty_cell = position;
             }
         }
-    }    
+    }
 }
 
 void Robot::find_dirty_cell(){
@@ -262,7 +261,7 @@ void Robot::find_dirty_cell(){
     que[front++] = position;
     visited[position.x][position.y] = true;
     const short dir[4][2] = {{0, -1}, {-1, 0}, {0, 1}, {1, 0}};
-    
+
     bool flag = false;
     while (front > tail && !flag){
         Point curr = que[tail++];
@@ -315,11 +314,10 @@ void Robot::reset_path(){
     int front = 0, tail = 0;
     const short dir[4][2] = {{0, -1}, {-1, 0}, {0, 1}, {1, 0}};
     que[front++] = last_dirty_cell;
-    (*board)[last_dirty_cell].step_wrt_ldc = 0;
+    (*board)[last_dirty_cell].step_wrt_ldc = -1;
 
     while (front > tail){
         Point curr = que[tail++];
-        (*board)[curr].step_wrt_ldc = -1;
         for (int k = 0; k < 4; k++){
             Point next(curr.x + dir[k][0], curr.y + dir[k][1]);
             if (out_of_bound(next) || !(*board)[next].can_walk()){
@@ -327,6 +325,7 @@ void Robot::reset_path(){
             }
             if ((*board)[next].step_wrt_ldc != -1){  // not visited
                 que[front++] = next;
+                (*board)[next].step_wrt_ldc = -1;
             }
         }
     }
