@@ -333,7 +333,7 @@ void Robot::reset_path(){
 
 Point Robot::sweep_one_cell(){
     position = pick_one_cell();
-    if (position == last_dirty_cell){
+    if (finding_path && position == last_dirty_cell){
         reset_path();
         finding_path = false;
     }
